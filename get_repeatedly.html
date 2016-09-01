@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="./standard/swduino.basic.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+	<script>
+	var requestDelay = 5000;
+	var isNeedSend = true;
+	var responded = true;
+	
+	var dfUrl = 'http://devapp145cn.netcracker.com:6371/arduino/set_params';
+	
+	function timeout(f, delay) {
+    setTimeout(function () {
+				f();
+        timeout(f, delay);
+    }, delay);
+	}
+	
+	function sendRequest() {	
+		if (isNeedSend && responded) {
+			responded = false;
+		
+			$.ajax({
+				url: 'http://localhost:8085/get',
+				success: function(data) {
+					responded = true;
+					onSuccess(data);					
+				}
+			});
+		}
+	}
+
+	function onSuccess(data) {
+		var dataSplitted = data.split('\n');
+		
+		var varsArray = [];
+		for (var i = 0; i < dataSplitted.length; i++) {
+			if (dataSplitted[i].indexOf('current_distance') !== -1 || 
+					dataSplitted[i].indexOf('luminocity_lvl') !== -1 ||
+					dataSplitted[i].indexOf('mode') !== -1) {
+				varsArray.push(dataSplitted[i]);
+			}
+		}
+		
+		sendResponse(varsArray);
+	}
+	
+	function sendResponse(params) {
+		var urlParams = '?' + params[0];
+		
+		for (var i = 1; i < params.length; i++) {
+			urlParams += '&' + params[i];
+		}
+	
+		$.ajax({
+			url: dfUrl + urlParams,
+		});
+	}
+	
+	timeout(sendRequest, requestDelay);
+	</script>
+</head>
+<body>
+</body>
+</html>
