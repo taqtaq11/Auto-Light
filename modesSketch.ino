@@ -5,13 +5,14 @@ swDuino objswDuino;
 const int relay_ctrl = 7;
 const int photoresistor_in = 0;
 const int dist_sensor_echo = 2;
-const int dist_sensor_trig = 3;
+const int dist_sensor_trig = 5;
 const int led = 8;
 
 const int max_luminocity_lvl = 200;
 const long activation_distance = 50;
 
 byte mode = 2; //0 - disabled, 1 - enabled, 2 - auto
+bool light_enabled = false;
 
 void setup() {  
   pinMode(relay_ctrl, OUTPUT);
@@ -29,30 +30,39 @@ void loop() {
   int current_lum_lvl = analogRead(photoresistor_in);
   long current_distance = getDistance();
 
-  objswDuino.write("current_distance", String(current_distance));
-  objswDuino.write("luminocity_lvl", String(current_lum_lvl));
-	objswDuino.write("mode", String(mode));
-
   if (mode == 0) {
-      digitalWrite(relay_ctrl, HIGH);
-      digitalWrite(led, LOW);
+    disableLight();
   }
   else if (mode == 1) {
-      digitalWrite(relay_ctrl, LOW);
-      digitalWrite(led, HIGH);
+    enableLight();
   }
   else {
       if (current_lum_lvl < max_luminocity_lvl && current_distance < activation_distance) {
-        digitalWrite(relay_ctrl, LOW);
-        digitalWrite(led, HIGH);
+        enableLight();
       }
       else {
-        digitalWrite(relay_ctrl, HIGH);
-        digitalWrite(led, LOW);
+        disableLight();
       }
   }
 
+  objswDuino.write("current_distance", String(current_distance));
+  objswDuino.write("luminocity_lvl", String(current_lum_lvl));
+  objswDuino.write("mode", String(mode));
+  objswDuino.write("light_enabled", String(light_enabled));
+
   delay(500);
+}
+
+void enableLight() {
+  digitalWrite(relay_ctrl, LOW);
+  digitalWrite(led, HIGH);
+  light_enabled = true;
+}
+
+void disableLight() {
+  digitalWrite(relay_ctrl, HIGH);
+  digitalWrite(led, LOW);
+  light_enabled = false;
 }
 
 long getDistance() {

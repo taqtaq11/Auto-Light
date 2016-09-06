@@ -38,7 +38,8 @@
 		for (var i = 0; i < dataSplitted.length; i++) {
 			if (dataSplitted[i].indexOf('current_distance') !== -1 || 
 					dataSplitted[i].indexOf('luminocity_lvl') !== -1 ||
-					dataSplitted[i].indexOf('mode') !== -1) {
+					dataSplitted[i].indexOf('mode') !== -1 ||
+					dataSplitted[i].indexOf('light_enabled') !== -1) {
 				varsArray.push(dataSplitted[i]);
 			}
 		}
